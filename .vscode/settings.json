@@ -1,0 +1,18 @@
+{
+    "idf.currentSetup": "/home/mat/esp/esp-idf",
+    "idf.flashType": "DFU",
+    "idf.openOcdConfigs": [
+        "board/esp32c6-lpcore-builtin.cfg"
+    ],
+    "idf.customExtraVars": {
+        "OPENOCD_USB_ADAPTER_LOCATION": "1-1",
+        "IDF_TARGET": "esp32c6"
+    },
+    "clangd.path": "/home/mat/.espressif/tools/esp-clangd/esp-21.1.3_20260408/esp-clangd/bin/clangd",
+    "clangd.arguments": [
+      "--background-index",
+      "--query-driver=**",
+      "--compile-commands-dir=/home/mat/devel/controller_hci_uart_esp32c3_and_esp32s3/build"
+    ],
+    "idf.port": "/dev/ttyACM0"
+}
