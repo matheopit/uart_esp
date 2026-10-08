@@ -4,6 +4,8 @@
 ESP-IDF UART HCI Controller
 =================================
 
+> **ESP32-C6** : voir [docs/ESP32C6_HCI_BLE.md](docs/ESP32C6_HCI_BLE.md) (pont VHCI, filtre BLE 5 pour Qt, câblage, risques) et [HISTORIQUE.md](HISTORIQUE.md).
+
 This example demonstrates how to configure the Bluetooth Low Energy Controller's HCI (Host Controller Interface) to communicate over UART.
 
 Using this example, BLE radio capabilities of ESP32-C3/ESP32-S3 chip, can be:
