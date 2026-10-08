@@ -323,10 +323,14 @@ Corrections des points 6.2, 6.4 et 6.5, développées à part :
 - **Écriture UART non bloquante :** si le tampon d'envoi UART reste plein plus de
   50 ms, le paquet du contrôleur est abandonné (et compté) au lieu de bloquer la
   tâche BLE.
-- **Signalement d'un reset au démarrage :** si Linux a le port ouvert (CTS actif), le
-  firmware envoie un événement HCI *Hardware Error*. Le noyau réinitialise alors
-  automatiquement l'adaptateur, sans relance manuelle de `btattach`.
+- **Signalement d'un reset au démarrage :** si Linux a le port ouvert (CTS actif et
+  RX au repos à l'état haut), le firmware envoie un événement HCI *Hardware Error*.
+  Le noyau réinitialise alors automatiquement l'adaptateur, sans relance manuelle
+  de `btattach`.
 - **`tools/linux/`** :
   - règle udev qui fixe le `latency_timer` FTDI à 1 ms, crée le lien
     `/dev/esp32c6-hci` et démarre le service ;
   - service systemd qui lance `btattach` au branchement et le relance en cas d'arrêt.
+  - installation : voir [`tools/linux/README.md`](../tools/linux/README.md).
+
+État des tests : voir la dernière section de [HISTORIQUE.md](../HISTORIQUE.md).

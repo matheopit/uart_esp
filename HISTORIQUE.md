@@ -162,6 +162,35 @@ CONFIG_EXAMPLE_HCI_UART_FLOW_CTRL_ENABLE=y
 CONFIG_BT_LE_HCI_EVT_LO_BUF_COUNT=16
 ```
 
+## 08/10/2026 — Documentation et branche `esp32c6-robustesse`
+
+- Branche `esp32c6-hci-uart` : ajout de `docs/ESP32C6_HCI_BLE.md`
+  (architecture, explication de l'advertising étendu, comparaison avec le Laird,
+  risques pour la pédale) et des scripts `tools/hci_bridge_test.py` et
+  `tools/hci_scan_test.py`.
+- Branche `esp32c6-robustesse`, créée à partir de `esp32c6-hci-uart` :
+  - **Écriture UART non bloquante :** si le tampon d'envoi reste plein plus de
+    50 ms, les paquets du contrôleur sont abandonnés. Une fois l'hôte détecté comme
+    bloqué, les paquets suivants sont abandonnés sans attente, jusqu'à ce qu'il
+    relise. Un message est journalisé au début et à la fin du blocage.
+  - **Hardware Error au démarrage :** si l'hôte a le port ouvert, l'événement
+    `04 10 01 00` est envoyé, et le noyau Linux réinitialise l'adaptateur. L'hôte
+    est considéré comme présent si CTS est à 0 et RX au repos à 1 (un FTDI non
+    alimenté tire toutes ses lignes à 0).
+  - `tools/linux/` : règle udev (`latency_timer` à 1 ms, lien `/dev/esp32c6-hci`,
+    démarrage du service) et service systemd `btattach` avec redémarrage
+    automatique. `systemd-analyze verify` passe.
+  - Compilé et flashé : la carte démarre.
+  - **À tester avec le FTDI branché ici :**
+    - aucune régression (`tools/hci_bridge_test.py`) ;
+    - comportement quand l'hôte ne lit plus ;
+    - réception de l'événement Hardware Error après un reset de l'ESP ;
+    - pas de faux positif quand le câble FTDI est débranché. Au premier essai,
+      l'ESP a signalé un hôte présent alors que le FTDI n'était pas branché sur ce
+      PC : il était peut-être branché ailleurs avec `btattach` en marche, à vérifier.
+  - **À tester sous Linux :** règle udev, service systemd et réinitialisation
+    réelle par le noyau après un Hardware Error.
+
 ## 08/10/2026 — Projet réservé à l'ESP32-C6
 
 - Le code d'origine pour C3/S3 (transport UHCI) est conservé dans la branche

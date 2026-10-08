@@ -1,0 +1,10 @@
+[Unit]
+Description=ESP32-C6 BLE controller over HCI UART (btattach)
+BindsTo=dev-esp32c6\x2dhci.device
+After=dev-esp32c6\x2dhci.device bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/btattach -B /dev/esp32c6-hci -P h4 -S 3000000
+Restart=always
+RestartSec=2

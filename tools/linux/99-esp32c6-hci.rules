@@ -1,0 +1,10 @@
+# Câble FTDI (FT232R) relié à l'ESP32-C6 en contrôleur BLE HCI UART.
+#  - latency_timer FTDI à 1 ms (16 ms par défaut, remis à chaque branchement)
+#  - lien stable /dev/esp32c6-hci
+#  - démarre esp32c6-hci.service (btattach)
+#
+# Ces règles s'appliquent à TOUS les câbles FTDI 0403:6001. Pour ne viser que le
+# vôtre, ajoutez ATTRS{serial}=="XXXXXXXX" (voir: udevadm info -a /dev/ttyUSB0).
+ACTION=="add", SUBSYSTEM=="tty", KERNEL=="ttyUSB*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", \
+    SYMLINK+="esp32c6-hci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="esp32c6-hci.service", \
+    RUN+="/bin/sh -c 'echo 1 > /sys/bus/usb-serial/devices/%k/latency_timer'"
