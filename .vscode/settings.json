@@ -1,8 +1,8 @@
 {
     "idf.currentSetup": "/home/mat/esp/esp-idf",
-    "idf.flashType": "DFU",
+    "idf.flashType": "UART",
     "idf.openOcdConfigs": [
-        "board/esp32c6-lpcore-builtin.cfg"
+        "board/esp32c6-builtin.cfg"
     ],
     "idf.customExtraVars": {
         "OPENOCD_USB_ADAPTER_LOCATION": "1-1",
