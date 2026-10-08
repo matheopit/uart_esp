@@ -161,3 +161,13 @@ CONFIG_EXAMPLE_HCI_UART_BAUDRATE=3000000
 CONFIG_EXAMPLE_HCI_UART_FLOW_CTRL_ENABLE=y
 CONFIG_BT_LE_HCI_EVT_LO_BUF_COUNT=16
 ```
+
+## 08/10/2026 — Projet réservé à l'ESP32-C6
+
+- Le code d'origine pour C3/S3 (transport UHCI) est conservé dans la branche
+  `esp32c3-esp32s3`, créée à partir de `main`, c'est-à-dire de l'exemple ESP-IDF
+  d'origine.
+- Dans les branches C6, le code C3/S3 est retiré de `main/main.c`, ainsi que la
+  dépendance `esp_ringbuf`. `sdkconfig.defaults` fixe maintenant la cible
+  `esp32c6`, et un `#error` empêche de compiler sans le mode VHCI. Le README est
+  réécrit pour le C6.
