@@ -171,3 +171,8 @@ CONFIG_BT_LE_HCI_EVT_LO_BUF_COUNT=16
   dépendance `esp_ringbuf`. `sdkconfig.defaults` fixe maintenant la cible
   `esp32c6`, et un `#error` empêche de compiler sans le mode VHCI. Le README est
   réécrit pour le C6.
+
+## 22/10/2026 — Publication
+
+- Tableau des branches ajouté au README.
+- Dépôt publié sur https://github.com/matheopit/uart_esp (toutes les branches).

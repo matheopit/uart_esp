@@ -34,6 +34,17 @@ echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer
 sudo btattach -B /dev/ttyUSB0 -P h4 -S 3000000
 ```
 
+## Branches
+
+| Branche | Contenu |
+|---|---|
+| `esp32c6-hci-uart` | **Branche de travail** : pont VHCI ⇄ UART, filtre BLE 5, documentation, scripts de test |
+| `esp32c6-robustesse` | `esp32c6-hci-uart` + écriture UART non bloquante, reset signalé à Linux (Hardware Error), règle udev et service systemd. Facultatif, tests non terminés |
+| `esp32c3-esp32s3` | Exemple ESP-IDF d'origine pour ESP32-C3 et ESP32-S3 (transport UHCI) |
+| `main` | Exemple ESP-IDF d'origine, point de départ des autres branches |
+
+Environnement : ESP-IDF v6.1.
+
 ## Documentation
 
 - [docs/ESP32C6_HCI_BLE.md](docs/ESP32C6_HCI_BLE.md) : architecture, câblage,
