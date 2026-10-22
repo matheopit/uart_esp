@@ -8,10 +8,12 @@ Kit de développement : l'ESP32-C6 sert de contrôleur Bluetooth Low Energy à u
 ou une VM Linux, par un câble FTDI (UART H4, 3 Mbit/s, RTS/CTS). Il est vu par
 Linux comme un adaptateur Bluetooth `hciX` grâce à `btattach`.
 
-Le firmware fait le pont entre l'UART et le contrôleur BLE (VHCI), et masque
-l'advertising étendu et périodique du BLE 5. Le noyau Linux utilise ainsi les
-commandes d'advertising legacy, ce qui permet à Qt Bluetooth de faire de
-l'advertising.
+Le firmware fait le pont entre l'UART et le contrôleur BLE (VHCI). En option
+(`CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV`, désactivée par défaut), il masque
+l'advertising étendu et périodique du BLE 5 : le noyau Linux utilise alors les
+commandes legacy, ce qui permet à Qt Bluetooth de faire de l'advertising. Le prix
+à payer : les appareils qui n'émettent qu'en BLE 5 étendu deviennent invisibles.
+Cette option est inutile quand Linux ne fait que scanner et se connecter.
 
 Basé sur l'exemple ESP-IDF `controller_hci_uart_esp32c3_and_esp32s3`. La version
 d'origine pour ESP32-C3 et ESP32-S3 est conservée dans la branche `esp32c3-esp32s3`.
@@ -38,7 +40,7 @@ sudo btattach -B /dev/ttyUSB0 -P h4 -S 3000000
 
 | Branche | Contenu |
 |---|---|
-| `esp32c6-hci-uart` | **Branche de travail** : pont VHCI ⇄ UART, filtre BLE 5, documentation, scripts de test |
+| `esp32c6-hci-uart` | **Branche de travail** : pont VHCI ⇄ UART, filtre BLE 5 en option, documentation, scripts de test |
 | `esp32c6-robustesse` | `esp32c6-hci-uart` + écriture UART non bloquante, reset signalé à Linux (Hardware Error), règle udev et service systemd. Facultatif, tests non terminés |
 | `esp32c3-esp32s3` | Exemple ESP-IDF d'origine pour ESP32-C3 et ESP32-S3 (transport UHCI) |
 | `main` | Exemple ESP-IDF d'origine, point de départ des autres branches |

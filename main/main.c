@@ -21,11 +21,13 @@ static const char *tag = "HCI_UART";
  * ESP32-C6 (LE controller): the HCI UART transport is bridged by the
  * application through VHCI, so that HCI traffic can be filtered.
  *
- * The LE Extended Advertising and LE Periodic Advertising bits are cleared
- * from the LE Read Local Supported Features response. The Linux kernel then
- * only uses legacy advertising/scanning commands, so applications sending
- * legacy advertising commands on a raw HCI socket (e.g. Qt Bluetooth) no
- * longer get "Command Disallowed" because of mixed legacy/extended commands.
+ * With CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV, the LE Extended Advertising and LE
+ * Periodic Advertising bits are cleared from the LE Read Local Supported
+ * Features response. The Linux kernel then only uses legacy advertising/
+ * scanning commands, so applications sending legacy advertising commands on a
+ * raw HCI socket (e.g. Qt Bluetooth) no longer get "Command Disallowed"
+ * because of mixed legacy/extended commands. Drawback: devices using only
+ * extended advertising are no longer seen by the host.
  */
 
 #define UART_HCI_NUM       (1)
@@ -49,16 +51,24 @@ static const char *tag = "HCI_UART";
 #define HCI_LE_FEAT1_EXT_ADV            (1 << 4)    /* LE features bit 12 */
 #define HCI_LE_FEAT1_PER_ADV            (1 << 5)    /* LE features bit 13 */
 
+#if CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV
+#define BLE5_ADV_STATE     "hidden from the host"
+#else
+#define BLE5_ADV_STATE     "visible to the host"
+#endif
+
 /* H4 type + ACL header + ACL payload */
 #define HCI_MAX_PKT_SIZE   (1 + 4 + 1024)
 
 static void hci_filter_controller_pkt(uint8_t *data, uint16_t len)
 {
+#if CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV
     /* H4 type, event code, param len, num packets, opcode (2), status, features (8) */
     if (len >= 15 && data[0] == H4_TYPE_EVT && data[1] == HCI_EVT_CMD_COMPLETE &&
         (data[4] | (data[5] << 8)) == HCI_OP_LE_READ_LOCAL_FEATURES && data[6] == 0) {
         data[8] &= ~(HCI_LE_FEAT1_EXT_ADV | HCI_LE_FEAT1_PER_ADV);
     }
+#endif
 }
 
 static void vhci_send_available(void)
@@ -182,7 +192,7 @@ void app_main(void)
     ESP_LOGI(tag, "HCI messages can be communicated over UART%d:\n"
              "--PINs: TxD %d, RxD %d, RTS %d, CTS %d\n"
              "--Baudrate: %d\n"
-             "--LE Extended/Periodic Advertising hidden from the host", UART_HCI_NUM,
+             "--LE Extended/Periodic Advertising: %s", UART_HCI_NUM,
              GPIO_UART_TXD_OUT, GPIO_UART_RXD_IN, GPIO_UART_RTS_OUT, GPIO_UART_CTS_IN,
-             CONFIG_EXAMPLE_HCI_UART_BAUDRATE);
+             CONFIG_EXAMPLE_HCI_UART_BAUDRATE, BLE5_ADV_STATE);
 }

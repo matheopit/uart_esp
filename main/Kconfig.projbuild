@@ -13,4 +13,19 @@ menu "Example Configuration"
         help
             Enable/disable HCI UART flow control
 
+    config EXAMPLE_HCI_HIDE_BLE5_ADV
+        bool "Hide LE Extended/Periodic Advertising from the host"
+        default n
+        help
+            Clear the LE Extended Advertising and LE Periodic Advertising bits
+            of the LE Read Local Supported Features response. The Linux kernel
+            then only uses legacy advertising, scanning and connection commands.
+
+            Needed by applications that send legacy advertising commands on a
+            raw HCI socket (Qt Bluetooth kernel peripheral backend), which
+            otherwise get "Command Disallowed".
+
+            Drawback: devices that only use extended advertising are not seen
+            by the host. Leave disabled when the host only scans and connects.
+
 endmenu

@@ -25,7 +25,7 @@ comme un adaptateur Bluetooth (`hciX`) branché sur un port série.
                                      ┌────────┴────────────────────────┐
                                      │ ESP32-C6                        │
                                      │  main.c : pont UART ⇄ VHCI      │
-                                     │           + filtre BLE 5        │
+                                     │  + filtre BLE 5 (option)        │
                                      │  contrôleur BLE (libble)        │
                                      └────────┬────────────────────────┘
                                               │ radio 2,4 GHz
@@ -79,6 +79,7 @@ La configuration fait référence dans [`sdkconfig.defaults.esp32c6`](../sdkconf
 | `CONFIG_EXAMPLE_HCI_UART_BAUDRATE` | `3000000` | Débit, plafonné par le câble FTDI (FT232R : 3 Mbit/s max) |
 | `CONFIG_EXAMPLE_HCI_UART_FLOW_CTRL_ENABLE` | `y` | Contrôle de flux RTS/CTS |
 | `CONFIG_BT_LE_HCI_EVT_LO_BUF_COUNT` | `16` | Moins de rapports d'advertising perdus pendant les scans |
+| `CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV` | `n` | Filtre BLE 5 (section 5). À activer uniquement si Qt doit faire de l'advertising |
 
 Le débit et le contrôle de flux se règlent aussi dans `idf.py menuconfig` →
 *Example Configuration*.
@@ -177,10 +178,13 @@ la première explication.
     `QT_BLUETOOTH_USE_DBUS_PERIPHERAL=1` en 6.5 et 6.6. Il faut BlueZ 5.56 ou plus.
     Avec ce backend, BlueZ choisit lui-même les bonnes commandes. Mais il faut
     maîtriser la version de Qt, et le comportement diffère de la cible.
-  - **Côté firmware (solution retenue) :** faire passer le C6 pour un contrôleur
-    comme le Laird.
+  - **Côté firmware :** faire passer le C6 pour un contrôleur comme le Laird.
+    C'est le filtre ci-dessous, activable dans menuconfig.
 
-### Le filtre
+### Le filtre (option `CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV`, désactivée par défaut)
+
+*menuconfig → Example Configuration → Hide LE Extended/Periodic Advertising from
+the host*
 
 Dans `main.c`, `hci_filter_controller_pkt()` repère l'événement `Command Complete` de
 `LE Read Local Supported Features` (opcode `0x2003`). Il y met à 0 :
@@ -192,18 +196,34 @@ Le noyau Linux se limite alors aux commandes legacy pour l'advertising, le scan 
 la connexion, comme avec le Laird. L'application Qt n'a rien à changer.
 
 **Ce qu'on perd :** les annonces de plus de 31 octets, l'advertising en Coded PHY
-(longue portée) et l'advertising périodique. **Ce qu'on garde :** le 2M PHY et les
-paquets longs (DLE) une fois connecté, ainsi que le chiffrement et l'appairage.
+(longue portée) et l'advertising périodique. Surtout, **le PC ne voit plus les
+appareils qui n'émettent qu'en advertising étendu.** **Ce qu'on garde :** le 2M PHY
+et les paquets longs (DLE) une fois connecté, ainsi que le chiffrement et
+l'appairage.
+
+### Quand activer le filtre
+
+| Rôle de l'application Qt sous Linux | Filtre |
+|---|---|
+| **Central** : scanne et se connecte à un périphérique (cas de l'appli pédale) | **désactivé**. Qt passe par BlueZ en D-Bus, sans socket HCI brut, donc sans conflit. Tous les appareils sont visibles. |
+| **Périphérique** : fait de l'advertising (`QLowEnergyController::startAdvertising`) avec le backend noyau de Qt | **activé**, ou bien utiliser le backend BlueZ D-Bus de Qt 6.5+ |
+
+Le filtre a d'abord été activé en permanence (tests d'advertising Qt). Il cachait
+des appareils BLE 5 lors des scans : c'est pourquoi il est devenu une option.
+
+`tools/hci_scan_compare.py` compare un scan legacy et un scan étendu, et liste les
+appareils qui seraient invisibles avec le filtre.
 
 ---
 
 ## 6. Risques pour le développement de la pédale BLE
 
-### 6.1 La pédale fait de l'advertising étendu (risque lié au filtre)
+### 6.1 La pédale fait de l'advertising étendu (seulement si le filtre est activé)
 
-Avec le filtre, le PC ne scanne plus qu'en legacy. **Si la pédale n'émet que de
-l'advertising étendu** (Coded PHY, ou annonces de plus de 31 octets), **elle sera
-invisible.** C'est rare pour une pédale ou un périphérique HID.
+Avec le filtre activé, le PC ne scanne plus qu'en legacy. **Si la pédale n'émet
+que de l'advertising étendu** (Coded PHY, ou annonces de plus de 31 octets),
+**elle sera invisible.** Le filtre est désactivé par défaut : l'appli pédale,
+qui ne fait que se connecter, n'en a pas besoin.
 
 À vérifier une fois avec *nRF Connect* sur un téléphone : il indique « Legacy » ou
 « Extended » pour chaque annonce.

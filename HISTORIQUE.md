@@ -176,3 +176,21 @@ CONFIG_BT_LE_HCI_EVT_LO_BUF_COUNT=16
 
 - Tableau des branches ajouté au README.
 - Dépôt publié sur https://github.com/matheopit/uart_esp (toutes les branches).
+
+## 22/10/2026 — Filtre BLE 5 rendu optionnel
+
+- **Constat :** certains périphériques BLE n'étaient plus visibles. Avec le filtre,
+  le noyau ne scanne qu'en legacy, donc les appareils qui n'émettent qu'en
+  advertising étendu (BLE 5) sont invisibles.
+- L'appli pédale fait de Linux le **central** (scan puis connexion). Qt passe alors
+  par BlueZ en D-Bus, sans socket HCI brut : le filtre n'est pas nécessaire.
+- Le filtre devient l'option `CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV` (menuconfig →
+  Example Configuration), **désactivée par défaut**. On ne l'active que pour faire de
+  l'advertising avec le backend noyau de Qt. Le message de démarrage indique son
+  état : « hidden from the host » ou « visible to the host ».
+- Nouveau script `tools/hci_scan_compare.py` : compare scan legacy et scan étendu,
+  et liste les appareils qui ne sont visibles qu'en étendu.
+- Compilé avec et sans le filtre.
+- **À faire :** flasher la carte, puis vérifier que les périphériques manquants
+  réapparaissent. Le script de comparaison n'a pas encore été lancé sur le
+  matériel.

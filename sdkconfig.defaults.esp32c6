@@ -1,7 +1,9 @@
 # ESP32-C6: the controller runs in VHCI mode and main.c bridges it to UART1
-# (TX 4, RX 5, RTS 6, CTS 7), hiding LE Extended/Periodic Advertising from
-# the host. Baudrate/flow control: menuconfig > Example Configuration.
+# (TX 4, RX 5, RTS 6, CTS 7). Baudrate, flow control and the BLE 5
+# advertising filter: menuconfig > Example Configuration.
 CONFIG_BT_LE_HCI_INTERFACE_USE_RAM=y
 CONFIG_EXAMPLE_HCI_UART_BAUDRATE=3000000
 CONFIG_EXAMPLE_HCI_UART_FLOW_CTRL_ENABLE=y
+# Filter only needed for Qt advertising (peripheral role); hides BLE 5-only devices
+# CONFIG_EXAMPLE_HCI_HIDE_BLE5_ADV is not set
 CONFIG_BT_LE_HCI_EVT_LO_BUF_COUNT=16
